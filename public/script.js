@@ -651,8 +651,6 @@ document.addEventListener('DOMContentLoaded', () => {
   wireGalleryToInstagram();
 
   const photoSlideshow = initSlideshow('slides-wrapper', 'photo-prev', 'photo-next', 'photo-play', 'photo-indicators', 'photo-current', 'photo-total');
-  initSlideshow('video-wrapper', 'video-prev', 'video-next', 'video-play', 'video-indicators', 'video-current', 'video-total');
-
   const thumbItems = document.querySelectorAll('.thumb-item');
   thumbItems.forEach(thumb => {
     thumb.addEventListener('click', () => {
