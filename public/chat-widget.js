@@ -57,16 +57,20 @@
   let history = [];
   let loading = false;
 
+  // Force initial states (CSS display:flex overrides HTML hidden attribute)
+  box.style.display = 'none';
+  openBtn.style.display = 'flex';
+
   openBtn.addEventListener('click', () => {
-    box.hidden = false;
-    openBtn.hidden = true;
+    box.style.display = 'flex';
+    openBtn.style.display = 'none';
     input.focus();
     setTimeout(() => { msgsEl.scrollTop = msgsEl.scrollHeight; }, 100);
   });
 
   closeBtn.addEventListener('click', () => {
-    box.hidden = true;
-    openBtn.hidden = false;
+    box.style.display = 'none';
+    openBtn.style.display = 'flex';
   });
 
   function addMsg(text, role) {
