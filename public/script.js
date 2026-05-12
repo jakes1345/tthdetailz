@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addonLine,
         `Vehicle: ${vehicle}`,
         `Customer: ${name} (${phone}${email ? ', ' + email : ''})`,
-        address ? `Address: ${address}` : null,
+        address ? `City: ${address}` : null,
         notes ? `Notes: ${notes}` : null,
         '',
         'Status: Tentative — pending confirmation by text from TTH Detailz (630-454-1159).'
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const ics = buildICS({
         summary,
         description,
-        location: address || 'Mobile service — Northwest Suburbs',
+        location: 'TTH Detailz — Northwest Suburbs (drop-off address sent on confirmation)',
         start,
         end
       });
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `Service: ${serviceLabel}`,
         addonLine,
         `When: ${dateNice} @ ${timeNice}`,
-        address ? `Where: ${address}` : `Where: (mobile)`,
+        address ? `Customer city: ${address}` : null,
         notes ? `Notes: ${notes}` : null
       ].filter(Boolean).join('\n');
 
