@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+.cursor/
+.claude/
+
+# Scraper output (keep scripts but not their data dumps)
+scraped/
+*.scraped.json
+
+# Image backups (keep the optimized versions, ignore originals)
+*.orig
