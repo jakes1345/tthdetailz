@@ -1,0 +1,244 @@
+/* TTH Detailz Chat Widget */
+#tth-chat * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#tth-chat-open {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c41e3a 0%, #8a1628 100%);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(196, 30, 58, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#tth-chat-open:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(196, 30, 58, 0.65);
+}
+
+#tth-chat-open svg {
+  width: 26px;
+  height: 26px;
+}
+
+#tth-chat-box {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Outfit', -apple-system, sans-serif;
+  animation: tth-slide-up 0.25s ease;
+}
+
+@keyframes tth-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#tth-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #c41e3a 0%, #8a1628 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+#tth-chat-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+  display: flex;
+}
+
+#tth-chat-close:hover { opacity: 1; }
+
+#tth-chat-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+#tth-chat-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  min-height: 120px;
+  overscroll-behavior: contain;
+}
+
+.tth-msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  animation: tth-fade-in 0.2s ease;
+}
+
+@keyframes tth-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.tth-bot {
+  align-self: flex-start;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  border-bottom-left-radius: 4px;
+}
+
+.tth-user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #c41e3a, #9a1830);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+#tth-chat-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+#tth-chat-input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#tth-chat-input:focus {
+  border-color: #c41e3a;
+}
+
+#tth-chat-input::placeholder {
+  color: #555;
+}
+
+#tth-chat-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #c41e3a 0%, #8a1628 100%);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+#tth-chat-send:hover { opacity: 0.9; }
+#tth-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#tth-chat-send svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tth-dot-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: tth-pulse 1s infinite;
+}
+
+@keyframes tth-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+
+#tth-chat-footer {
+  display: flex;
+  border-top: 1px solid #1a1a1a;
+  flex-shrink: 0;
+}
+
+.tth-chat-action {
+  flex: 1;
+  text-align: center;
+  padding: 10px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tth-chat-action:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.tth-chat-action + .tth-chat-action {
+  border-left: 1px solid #1a1a1a;
+}
+
+@media (max-width: 480px) {
+  #tth-chat-box {
+    bottom: 0;
+    right: 0;
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    border: none;
+    height: 100dvh;
+  }
+  #tth-chat-msgs {
+    max-height: none;
+    flex: 1;
+  }
+  #tth-chat-open {
+    bottom: 16px;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+}
