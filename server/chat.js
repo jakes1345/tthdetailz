@@ -1,4 +1,5 @@
 const express = require('express');
+const RateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.CHAT_PORT || 3001;
 const GROQ_KEY = process.env.GROQ_API_KEY;
@@ -25,6 +26,16 @@ db.exec(`
 `);
 
 app.use(express.json());
+
+const apiLimiter = RateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Slow down.' }
+});
+
+app.use('/api/', apiLimiter);
 
 const FAQ = [
   { match: /\b(full detail|both interior)\b.*\b(price|cost|how much)\b|\b(200|225)\b/, resp: 'Full Detail (drop-off): Sedan $200, SUV/Truck $225. Add-ons extra. Text 630-454-1159 to book!' },
