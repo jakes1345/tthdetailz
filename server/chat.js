@@ -4,6 +4,26 @@ const PORT = process.env.CHAT_PORT || 3001;
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
+
+const DB_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+const db = new Database(path.join(DB_DIR, 'reviews.db'));
+db.pragma('journal_mode = WAL');
+db.exec(`
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+    vehicle TEXT DEFAULT '',
+    review_text TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'approved',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
 app.use(express.json());
 
 const FAQ = [
@@ -114,5 +134,35 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, groq: !!GROQ_KEY, gemini: !!GEMINI_KEY }));
+
+app.get('/api/reviews', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT id, name, rating, vehicle, review_text, created_at FROM reviews WHERE status = ? ORDER BY created_at DESC').all('approved');
+    res.json(rows);
+  } catch (err) {
+    console.error('Reviews fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to load reviews.' });
+  }
+});
+
+app.post('/api/reviews', (req, res) => {
+  try {
+    const { name, rating, vehicle, review_text } = req.body || {};
+    if (!name || !rating || !review_text) {
+      return res.status(400).json({ error: 'Name, rating, and review text are required.' });
+    }
+    const stmt = db.prepare('INSERT INTO reviews (name, rating, vehicle, review_text) VALUES (?, ?, ?, ?)');
+    const result = stmt.run(
+      name.trim(),
+      Math.min(5, Math.max(1, parseInt(rating, 10) || 5)),
+      (vehicle || '').trim(),
+      review_text.trim()
+    );
+    res.json({ id: result.lastInsertRowid, status: 'approved' });
+  } catch (err) {
+    console.error('Review submit error:', err.message);
+    res.status(500).json({ error: 'Failed to save review.' });
+  }
+});
 
 app.listen(PORT, () => console.log('Chat server on port ' + PORT));

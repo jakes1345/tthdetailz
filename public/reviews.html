@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews · TTH Detailz | Car Detailing — NW Suburbs</title>
+  <meta name="description" content="See what our customers say about TTH Detailz. Leave a review for your detail — interior, exterior, full detail in the Northwest Suburbs of Chicago.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='28' fill='%23d4a017'%3ETTH%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">TTH <span class="accent">Detailz</span></a>
+      <ul class="nav-links">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/#gallery">Gallery</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/#book" class="btn-nav">Book Now</a></li>
+      </ul>
+      <button class="menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="reviews-hero">
+    <div class="container">
+      <div class="section-header" style="text-align:center;">
+        <p class="section-subtitle">Customer Reviews</p>
+        <h1 class="section-title">What Our Customers Say</h1>
+        <div class="section-line" style="margin:0 auto 30px;"></div>
+        <p class="section-lead">Real reviews from real customers in the Northwest Suburbs. We take pride in every car we touch.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="review-stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number" id="statReviews">0</span>
+          <span class="stat-label">Reviews</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statRating">5.0</span>
+          <span class="stat-label">Average Rating</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statCars">0</span>
+          <span class="stat-label">Cars Detailed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statYears">1+</span>
+          <span class="stat-label">Years Serving</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews-list-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-subtitle">Recent Reviews</p>
+        <h2 class="section-title">What People Are Saying</h2>
+        <div class="section-line"></div>
+      </div>
+      <div id="reviewsContainer" class="reviews-grid">
+        <div class="reviews-loading">Loading reviews...</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="leave-review">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-subtitle">Leave a Review</p>
+        <h2 class="section-title">Share Your Experience</h2>
+        <div class="section-line"></div>
+        <p class="section-lead">Had your car detailed by us? Let others know how it went.</p>
+      </div>
+      <form id="reviewForm" class="review-form" novalidate>
+        <div class="review-form-grid">
+          <div class="form-row">
+            <label for="reviewName">Your Name *</label>
+            <input type="text" id="reviewName" name="name" required placeholder="e.g. Jake M.">
+          </div>
+          <div class="form-row">
+            <label for="reviewVehicle">Vehicle (optional)</label>
+            <input type="text" id="reviewVehicle" name="vehicle" placeholder="e.g. 2020 Honda Civic">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Rating *</label>
+          <div class="star-picker" id="starPicker">
+            <button type="button" class="star" data-value="1" aria-label="1 star">☆</button>
+            <button type="button" class="star" data-value="2" aria-label="2 stars">☆</button>
+            <button type="button" class="star" data-value="3" aria-label="3 stars">☆</button>
+            <button type="button" class="star" data-value="4" aria-label="4 stars">☆</button>
+            <button type="button" class="star" data-value="5" aria-label="5 stars">☆</button>
+          </div>
+          <input type="hidden" name="rating" id="reviewRating" value="5">
+        </div>
+        <div class="form-row form-row-full">
+          <label for="reviewText">Your Review *</label>
+          <textarea id="reviewText" name="review_text" rows="4" required placeholder="Tell us about your experience..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Submit Review</button>
+        <div id="reviewSuccess" class="review-success" hidden>
+          <p>✓ Thanks for your review! It's now live on the site.</p>
+        </div>
+        <div id="reviewError" class="review-error" hidden>
+          <p>Something went wrong. Please try again, or text us at <a href="tel:+16304541159">630-454-1159</a>.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo">TTH <span class="accent">Detailz</span></a>
+          <p>Premium auto detailing — interior, exterior, full details. Mobile across the Northwest Suburbs. All budgets welcome.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/#services">Services</a></li>
+            <li><a href="/#gallery">Gallery</a></li>
+            <li><a href="/#faq">FAQ</a></li>
+            <li><a href="/#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-services">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="/#services">Exterior Detail</a></li>
+            <li><a href="/#services">Interior Detail</a></li>
+            <li><a href="/#services">Full Detail</a></li>
+            <li><a href="/#services">Engine, Pet Hair, Odor</a></li>
+          </ul>
+        </div>
+        <div class="footer-social">
+          <h4>Follow Us</h4>
+          <div class="social-links">
+            <a href="https://snapchat.com/add/keon073" target="_blank" rel="noopener" aria-label="keon073 on Snapchat">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.206 1c.056 0 .112 0 .169.003 1.768.041 3.03.785 3.752 2.212.352.696.5 1.47.5 2.283l-.002.246c-.018.59-.042 1.252.042 1.858.078.56.335.825.542.913.134.057.291.07.433.043.27-.053.546-.169.797-.287.082-.038.23-.08.37-.08.184 0 .378.068.52.218.199.21.222.488.036.786-.218.349-.586.574-.972.75-.278.126-.561.218-.77.286l-.127.044c-.164.058-.233.105-.258.136.019.064.136.22.326.46l.039.048c.543.67 1.216 1.504 1.37 2.475.053.334.015.67-.115.98-.278.667-.934 1.06-1.614 1.178-.274.048-.553.063-.817.06-.133-.001-.266-.011-.399-.02l-.185-.01c-.028-.002-.082.028-.18.1-.193.14-.45.345-.81.555-.633.37-1.498.725-2.722.867-.052.006-.095.043-.102.097-.033.247-.138.393-.3.455-.126.047-.273.043-.397.034l-.057-.004c-.158-.007-.331-.015-.533.02-.217.037-.454.134-.722.327-.467.338-.928.834-1.574 1.212-.37.216-.796.387-1.306.387-.025 0-.05 0-.076-.002-.03.001-.063.002-.097.002-.51 0-.935-.171-1.306-.387-.646-.378-1.107-.874-1.574-1.212-.268-.193-.505-.29-.722-.328-.202-.034-.375-.026-.533-.019l-.057.004c-.124.009-.27.013-.397-.034-.162-.062-.268-.208-.3-.455-.007-.054-.05-.091-.102-.097-1.224-.142-2.089-.497-2.722-.867-.36-.21-.617-.414-.81-.555-.098-.072-.152-.102-.18-.1l-.185.01c-.133.01-.266.02-.399.02-.284.004-.543-.011-.817-.06-.68-.117-1.336-.51-1.614-1.177-.13-.311-.168-.647-.115-.98.154-.972.827-1.806 1.37-2.476l.039-.048c.19-.24.307-.396.326-.46-.025-.031-.094-.078-.258-.136l-.127-.044c-.21-.068-.492-.16-.77-.286-.386-.176-.754-.401-.972-.75-.186-.298-.163-.577.036-.786.142-.15.336-.219.52-.219.14 0 .288.043.37.081.251.118.527.234.797.287.142.028.3.014.433-.043.207-.088.464-.352.542-.913.084-.606.06-1.268.042-1.858l-.002-.246c0-.813.148-1.587.5-2.283C8.595 1.788 9.857 1.044 11.625 1.003c.057-.003.113-.003.169-.003h.412z"/>
+              </svg>
+            </a>
+            <a href="https://instagram.com/tthdetailz" target="_blank" rel="noopener" aria-label="@tthdetailz on Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="footerYear">2026</span> TTH Detailz. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="reviews.js"></script>
+</body>
+</html>
