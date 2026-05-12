@@ -8,3 +8,4 @@
 - The repo uses `server.js` for local static serving and `server/chat.js` for chat/review API behavior.
 - Site images and social/gallery media are stored under `public/media/`.
 - `public/track.js` posts optional first-party analytics to `POST /api/track` (SQLite `events` table). Forms include honeypot fields aligned with `server/chat.js`.
+- After an online booking request, `public/script.js` calls `POST /api/thanks` (`kind: booking`) so customers get one personalized thank-you SMS via Textbelt.

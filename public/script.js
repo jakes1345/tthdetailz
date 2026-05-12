@@ -327,6 +327,34 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastSmsBody = '';
   let lastSmsHref = '';
 
+  function bookingHoneypotPayload(form) {
+    if (!form) return {};
+    const keys = ['hp_website', 'website', 'url', 'company_website', '_hp'];
+    const o = {};
+    keys.forEach((k) => {
+      const el = form.querySelector('[name="' + k + '"]');
+      o[k] = el && el.value ? el.value : '';
+    });
+    return o;
+  }
+
+  function sendBookingThankYouSms(form, phoneRaw, nameRaw, vehicleRaw) {
+    try {
+      fetch('/api/thanks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: phoneRaw,
+          name: nameRaw,
+          vehicle: vehicleRaw,
+          kind: 'booking',
+          ...bookingHoneypotPayload(form)
+        }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
   function isLikelyMobileDevice() {
     const ua = navigator.userAgent || '';
     if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
@@ -516,6 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
           service: (service || '').slice(0, 48)
         });
       }
+
+      sendBookingThankYouSms(bookingForm, phone, name, vehicle);
 
       if (mobile) {
         window.location.href = smsHref;

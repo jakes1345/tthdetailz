@@ -70,7 +70,7 @@ const reviewsLimiter = RateLimit({
 
 const thanksLimiter = RateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many thank-you texts from this IP. Try later.' }
@@ -90,6 +90,58 @@ function cleanText(value, maxLen) {
 
 function normalizePhone(value) {
   return String(value || '').replace(/[^0-9]/g, '');
+}
+
+/** First name for SMS greeting — avoids stiff “Dear Customer”. */
+function firstNameFromFullName(fullName) {
+  const t = cleanText(fullName, 80);
+  if (!t) return '';
+  const raw = t.split(/\s+/)[0];
+  const stripped = raw.replace(/[^a-zA-Z'-]/g, '');
+  if (stripped.length >= 2) return stripped.slice(0, 22);
+  if (stripped.length === 1) return stripped;
+  return raw.slice(0, 22);
+}
+
+function shortVehicleHint(vehicle) {
+  const v = cleanText(vehicle, 120);
+  if (!v) return '';
+  return v.replace(/\s+/g, ' ').trim().slice(0, 44);
+}
+
+function thankYouVariantIndex(seedPhone) {
+  const s = seedPhone || '0';
+  let sum = 0;
+  for (let i = 0; i < s.length; i++) sum += s.charCodeAt(i);
+  const day = Math.floor(Date.now() / (86400000));
+  return (sum + day) % 6;
+}
+
+/**
+ * Warm, rotating copy — reads human, not drip-marketing.
+ * `kind`: "booking" (rotating personalized copy) | anything else (warm + review link).
+ */
+function buildThankYouSms({ kind, rawName, vehicle, seedPhone }) {
+  const first = firstNameFromFullName(rawName);
+  const open = first ? `${first} — ` : '';
+  const veh = shortVehicleHint(vehicle);
+  const vehBit = veh ? veh : '';
+
+  if (kind === 'booking') {
+    const i = thankYouVariantIndex(seedPhone);
+    const msgs = [
+      `${open}got your booking — seriously, thank you for trusting us${vehBit ? ` with ${vehBit}` : ''}. I'll text you shortly to confirm time & details; reply anytime if anything shifts. — TTH Detailz`,
+      `${open}your detail request just hit my phone. Means a lot you'd choose us.${vehBit ? ` ${vehBit} — we'll treat it right.` : ''} Watch for my text in a bit so we're locked in. Grateful you're here. — TTH Detailz`,
+      `${open}wanted to say thanks right away.${vehBit ? ` Pumped to work on ${vehBit}.` : ` Pumped to get your ride dialed in.`} I'll reach out by text soon — holler before then if you need anything. — TTH Detailz`,
+      `${open}that's in — appreciate you booking with TTH Detailz.${vehBit ? ` ${vehBit} is noted.` : ''} I'll follow up by text usually within the hour to personalize the plan & confirm spot / mobile. — TTH Detailz`,
+      `${open}thanks for stepping up and booking.${vehBit ? ` We'll take extra care with ${vehBit}.` : ''} You'll hear from me by text shortly; happy to tweak timing if needed. — TTH Detailz`,
+      `${open}real talk — thank you.${vehBit ? ` Looking forward to ${vehBit} looking right.` : ` Looking forward to making your car feel new again.`} Confirming everything by text shortly — that's really us, not spam. — TTH Detailz`
+    ];
+    return msgs[i];
+  }
+
+  const fallbackHey = first ? `${first}` : 'Hey';
+  return `${fallbackHey}, thanks for rolling with TTH Detailz — means a ton. Whenever you are ready, we would love your honest take: https://tthdetailz.autos/reviews.html — TTH Detailz`;
 }
 
 const HONEYPOT_FIELDS = ['hp_website', 'website', 'url', 'company_website', '_hp'];
@@ -313,9 +365,11 @@ app.post('/api/thanks', thanksLimiter, async (req, res) => {
       console.warn('Thanks honeypot triggered from', req.ip);
       return res.status(400).json({ error: 'Invalid submission.' });
     }
-    const { phone, name } = req.body || {};
+    const { phone, name, vehicle, kind } = req.body || {};
     const cleanPhone = normalizePhone(phone);
-    const cleanName = cleanText(name, 80);
+    const rawName = cleanText(name, 80);
+    const kindRaw = cleanText(kind, 24).toLowerCase();
+    const smsKind = kindRaw === 'booking' ? 'booking' : 'other';
     if (!cleanPhone) {
       return res.status(400).json({ error: 'Phone number is required.' });
     }
@@ -323,7 +377,12 @@ app.post('/api/thanks', thanksLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Phone number format is invalid.' });
     }
     const TEXTBELT_URL = 'https://textbelt.com/text';
-    const msg = `Hey${cleanName ? ' ' + cleanName : ''}, thanks for choosing TTH Detailz! Leave a review: https://tthdetailz.autos/reviews.html`;
+    const msg = buildThankYouSms({
+      kind: smsKind,
+      rawName,
+      vehicle,
+      seedPhone: cleanPhone
+    });
     const textRes = await fetch(TEXTBELT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
