@@ -1,47 +1,82 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
-
 const PORT = process.env.CHAT_PORT || 3001;
+const GROQ_KEY = process.env.GROQ_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
-if (!GEMINI_KEY) {
-  console.error('Missing GEMINI_API_KEY env var');
-  process.exit(1);
+app.use(express.json());
+
+const FAQ = [
+  { match: /\b(full detail|both interior)\b.*\b(price|cost|how much)\b|\b(200|225)\b/, resp: 'Full Detail (drop-off): Sedan $200, SUV/Truck $225. Add-ons extra. Text 630-454-1159 to book!' },
+  { match: /\bexterior\b.*\b(price|cost|how much)\b|\b(how much)\b.*\bexterior\b/, resp: 'Exterior Detail (drop-off): Sedan $70, SUV/Truck $75. Includes wash, wax, wheels, & tire shine.' },
+  { match: /\binterior\b.*\b(price|cost|how much)\b|\b(how much)\b.*\binterior\b/, resp: 'Interior Detail (drop-off): Sedan $140, SUV/Truck $165. Includes vacuum, shampoo, leather clean, & dashboard.' },
+  { match: /(add.?on|engine bay|pet hair|odor removal|3rd row)/, resp: 'Add-ons: Engine Bay +$75, Pet Hair Removal +$50, Odor Removal +$125, 3rd Row +$25.' },
+  { match: /\b(mobile|upcharge|distance|come to me|pickup|travel fee|extra mile)\b/, resp: 'We prefer drop-offs, but mobile is available for an upcharge: 0-5mi +$30, 5-15mi +$45, 15-25mi +$65. Over 25mi, call for a quote.' },
+  { match: /\b(phone|call|text)\b.*\b(number|contact)\b|(630)/, resp: 'Call or text 630-454-1159 to book or ask questions!' },
+  { match: /\b(instagram|ig)\b/, resp: 'Follow us on Instagram @tthdetailz for our latest work!' },
+  { match: /\b(snapchat|snap)\b/, resp: 'Add us on Snapchat: keon073' },
+  { match: /\b(where|location|area)\b/, resp: 'We serve the NW Suburbs of Chicago. Drop-offs preferred; mobile available for extra.' },
+  { match: /\b(payment|pay|venmo|zelle|paypal|cash|card)\b/, resp: 'We accept Cash, Card, Venmo, Zelle, and PayPal.' },
+  { match: /\b(book|appointment|schedule|reserve)\b/, resp: 'Ready to book? Text or call 630-454-1159 and they will get you set up!' },
+  { match: /^(hi|hello|hey|sup|yo|what.up)\b/, resp: 'Welcome to TTH Detailz! We do car detailing in the NW Suburbs of Chicago. Drop-offs preferred. Text 630-454-1159 to book. How can I help?' },
+];
+
+const SYSTEM_PROMPT = [
+  'You are the TTH Detailz website assistant. Be helpful, brief, and friendly.',
+  'Keep responses under 3 sentences.',
+  '',
+  'BUSINESS: TTH Detailz - car detailing in NW Suburbs of Chicago',
+  'Drop-off standard. Mobile upcharge: 0-5mi +$30, 5-15mi +$45, 15-25mi +$65',
+  '',
+  'PRICING (drop-off):',
+  'Exterior: Sedan $70, SUV/Truck $75',
+  'Interior: Sedan $140, SUV/Truck $165',
+  'Full Detail: Sedan $200, SUV/Truck $225',
+  'Add-ons: Engine Bay +$75, Pet Hair +$50, Odor +$125, 3rd Row +$25',
+  '',
+  'CONTACT: 630-454-1159, IG @tthdetailz, Snap keon073',
+  'PAYMENT: Cash, card, Venmo, Zelle, PayPal',
+  '',
+  'RULES: If someone wants to book, tell them to text or call 630-454-1159.',
+].join('\n');
+
+async function callGroq(messages) {
+  if (!GROQ_KEY) return null;
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, max_tokens: 300, temperature: 0.7 })
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || null;
 }
 
-const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-const model = genAI.getGenerativeModel({
-  model: 'gemini-2.0-flash-lite',
-  systemInstruction: `You are the TTH Detailz website assistant. Be helpful, brief, and friendly. Use emojis sparingly. Keep responses under 4 sentences if possible.
+async function callGemini(msg, history) {
+  if (!GEMINI_KEY) return null;
+  const res = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: (history || []).slice(-10).concat([{ role: 'user', parts: [{ text: msg }] }])
+      })
+    }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+}
 
-BUSINESS INFO:
-- Name: TTH Detailz (car detailing)
-- Location: Northwest Suburbs of Chicago (Schaumburg, Palatine, Arlington Heights, Hoffman Estates area)
-- Drop-off is standard. Address sent after booking.
-- Mobile available with distance upcharge: 0-5mi +$30, 5-15mi +$45, 15-25mi +$65, 25+ miles call for quote
-
-PRICING (drop-off):
-- Exterior Detail: Sedan $70, SUV/Truck $75
-- Interior Detail: Sedan $140, SUV/Truck $165
-- Full Detail (interior+exterior): Sedan $200, SUV/Truck $225
-- Add-ons: Engine Bay +$75, Pet Hair +$50, Odor Removal +$125, 3rd Row +$25
-
-CONTACT:
-- Call/Text: 630-454-1159
-- Instagram: @tthdetailz
-- Snapchat: keon073
-- Same-day appointments when available
-- Payment: Cash, card, Venmo, Zelle, PayPal
-
-RULES:
-- If someone wants to book, tell them to text or call 630-454-1159 or DM @tthdetailz on Instagram
-- If you don't know something, say "I'm not sure — text 630-454-1159 and they'll sort you out"
-- Never make up pricing. Only use the prices listed above.
-- Be chill and conversational, like a friendly shop employee`
-});
-
-app.use(express.json());
+function findMatch(text) {
+  const lower = text.toLowerCase().trim();
+  for (const faq of FAQ) {
+    if (faq.match.test(lower)) return faq.resp;
+  }
+  return null;
+}
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -50,22 +85,34 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const chat = model.startChat({
-      history: (history || []).slice(-10) // keep last 10 exchanges
-    });
+    const reply = findMatch(message);
+    if (reply) return res.json({ reply });
 
-    const result = await chat.sendMessage(message);
-    const reply = result.response.text();
+    if (GROQ_KEY) {
+      const msgs = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...(history || []).map(m => ({
+          role: m.role === 'model' ? 'assistant' : 'user',
+          content: m.parts?.[0]?.text || ''
+        })),
+        { role: 'user', content: message }
+      ];
+      const groq = await callGroq(msgs);
+      if (groq) return res.json({ reply: groq });
+    }
 
-    res.json({ reply });
+    if (GEMINI_KEY) {
+      const gem = await callGemini(message, history);
+      if (gem) return res.json({ reply: gem });
+    }
+
+    res.json({ reply: 'Text 630-454-1159 and they\'ll help you out!' });
   } catch (err) {
     console.error('Chat error:', err.message);
-    res.status(500).json({ error: 'Something went wrong. Try texting 630-454-1159 directly.' });
+    res.status(500).json({ error: 'Something went wrong. Text 630-454-1159.' });
   }
 });
 
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, groq: !!GROQ_KEY, gemini: !!GEMINI_KEY }));
 
-app.listen(PORT, () => {
-  console.log(`Chat server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log('Chat server on port ' + PORT));
