@@ -1804,7 +1804,7 @@ ul {
   z-index: 9;
 }
 .ba-tag-left { left: 16px; }
-.ba-tag-right { right: 16px; background: var(--gold, #d4a017); color: #000; }
+.ba-tag-right { right: 16px; background: var(--red); color: #fff; }
 
 /* === Calculator addon note === */
 .addons-note {
@@ -1866,7 +1866,7 @@ ul {
 .form-row select:focus,
 .form-row textarea:focus {
   outline: none;
-  border-color: var(--gold, #d4a017);
+  border-color: var(--red);
   background: rgba(255,255,255,0.06);
 }
 .form-row textarea { resize: vertical; min-height: 80px; }
@@ -1891,7 +1891,7 @@ ul {
   padding: 8px 12px;
   border-radius: 999px;
 }
-.checkbox-row .cb input { accent-color: var(--gold, #d4a017); }
+.checkbox-row .cb input { accent-color: var(--red); }
 .booking-disclaimer {
   text-align: center;
   color: var(--text-muted);
@@ -1903,14 +1903,21 @@ ul {
   margin: 24px auto 0;
   padding: 32px;
   background: var(--bg-card);
-  border: 1px solid rgba(212, 160, 23, 0.4);
+  border: 1px solid rgba(196, 30, 58, 0.4);
   border-radius: 16px;
   text-align: center;
+  box-shadow: 0 12px 40px rgba(196, 30, 58, 0.12);
 }
 .booking-success h3 {
   font-size: 26px;
   margin-bottom: 12px;
-  color: var(--gold, #d4a017);
+  color: var(--red);
+}
+.booking-success > p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 560px;
+  margin: 0 auto;
 }
 .booking-success-actions {
   margin-top: 22px;
@@ -1918,6 +1925,73 @@ ul {
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/* Desktop / iMessage fallback panel inside booking-success */
+.booking-fallback {
+  margin: 22px auto 4px;
+  max-width: 600px;
+  padding: 18px 18px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  text-align: left;
+}
+.booking-fallback-lead {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.booking-fallback-lead a { color: var(--red); text-decoration: underline; }
+.booking-fallback-foot {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.55;
+}
+.booking-fallback-foot a { color: var(--text-secondary); text-decoration: underline; }
+.booking-fallback-foot a strong { color: var(--text-primary); }
+.booking-message-wrap {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 14px 14px 14px;
+}
+.booking-message {
+  margin: 0;
+  font-family: 'Space Grotesk', 'SF Mono', Consolas, ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 220px;
+  overflow: auto;
+  padding-right: 8px;
+}
+.btn-copy {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  background: var(--red);
+  color: #fff;
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+.btn-copy:hover { background: var(--accent-hover); }
+.btn-copy.is-copied {
+  background: transparent;
+  color: var(--red);
 }
 @media (max-width: 640px) {
   .booking-form { padding: 24px; }
@@ -1939,15 +2013,15 @@ ul {
   margin: 36px auto 0;
 }
 .dm-howto-card {
-  background: linear-gradient(135deg, rgba(212, 160, 23, 0.08), rgba(255,255,255,0.02));
-  border: 1px solid rgba(212, 160, 23, 0.35);
+  background: linear-gradient(135deg, rgba(196, 30, 58, 0.08), rgba(255,255,255,0.02));
+  border: 1px solid rgba(196, 30, 58, 0.35);
   border-radius: 16px;
   padding: 32px;
 }
 .dm-howto-card h3 {
   font-size: 22px;
   margin-bottom: 18px;
-  color: var(--gold, #d4a017);
+  color: var(--red);
 }
 .dm-howto-list {
   list-style: none;
@@ -1962,7 +2036,7 @@ ul {
   position: relative;
   padding: 12px 14px 12px 52px;
   background: rgba(255,255,255,0.03);
-  border-left: 3px solid var(--gold, #d4a017);
+  border-left: 3px solid var(--red);
   border-radius: 6px;
   font-size: 15px;
   color: var(--text-primary);
@@ -1976,8 +2050,8 @@ ul {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--gold, #d4a017);
-  color: #000;
+  background: var(--red);
+  color: #fff;
   font-weight: 800;
   font-size: 14px;
   display: flex;
@@ -2047,7 +2121,7 @@ ul {
   margin: 28px auto 0;
   max-width: 720px;
   text-align: center;
-  background: linear-gradient(135deg, rgba(225, 48, 108, 0.08), rgba(212, 160, 23, 0.05));
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.08), rgba(196, 30, 58, 0.05));
   border: 1px solid rgba(225, 48, 108, 0.3);
   border-radius: 16px;
   padding: 32px 28px;
@@ -2078,7 +2152,11 @@ ul {
   flex-wrap: wrap;
 }
 
-/* === Service Location (Drop-Off vs Mobile) === */
+/* === Service Location (Drop-Off vs Mobile) ===
+   Shared visual language across calculator + booking form:
+   - red accent on checked
+   - identical border radius / weight / hover treatment
+   - compact horizontal toggle in booking form mirrors calculator card */
 .location-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2101,12 +2179,12 @@ ul {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
+  gap: 10px;
   padding: 22px 18px;
   background: var(--bg-card);
   border: 2px solid #2a2a2a;
   border-radius: 14px;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   height: 100%;
 }
 .location-card svg {
@@ -2120,15 +2198,15 @@ ul {
   background: var(--bg-elevated);
 }
 .location-option input:checked + .location-card {
-  border-color: var(--gold, #d4a017);
+  border-color: var(--red);
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 1px var(--gold, #d4a017) inset, 0 6px 24px rgba(212, 160, 23, 0.15);
+  box-shadow: 0 0 0 1px var(--red) inset, 0 8px 28px rgba(196, 30, 58, 0.18);
 }
 .location-option input:checked + .location-card svg {
-  color: var(--gold, #d4a017);
+  color: var(--red);
 }
 .location-option input:focus-visible + .location-card {
-  outline: 2px solid var(--gold, #d4a017);
+  outline: 2px solid var(--red);
   outline-offset: 2px;
 }
 .location-title {
@@ -2143,7 +2221,7 @@ ul {
 .location-sub {
   font-size: 0.85rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 .upcharge-tag {
   display: inline-block;
@@ -2152,22 +2230,104 @@ ul {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: var(--gold, #d4a017);
-  color: #000;
+  background: var(--red);
+  color: #fff;
   border-radius: 4px;
+  vertical-align: middle;
 }
 .mobile-upcharge-note {
-  margin: 12px 0 16px;
-  padding: 10px 14px;
-  background: rgba(212, 160, 23, 0.08);
-  border-left: 3px solid var(--gold, #d4a017);
-  border-radius: 4px;
-  font-size: 0.88rem;
+  margin: 14px 0 18px;
+  padding: 12px 16px;
+  background: rgba(196, 30, 58, 0.08);
+  border-left: 3px solid var(--red);
+  border-radius: 6px;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* === Booking-form location toggle (compact horizontal) === */
+.calc-distance {
+  margin-top: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.calc-distance h4 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.distance-tiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.distance-option {
+  display: block;
+  cursor: pointer;
+}
+
+.distance-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.distance-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.distance-card:hover { border-color: #444; }
+
+.distance-label {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.distance-price {
+  color: var(--red);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.distance-option input:checked + .distance-card {
+  border-color: var(--red);
+  background: rgba(196, 30, 58, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(196, 30, 58, 0.35);
+}
+
+.distance-option input:focus-visible + .distance-card {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+.distance-custom .distance-price {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.distance-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* === Booking-form location toggle (mirrors calculator card visuals) === */
 .location-toggle {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2176,6 +2336,7 @@ ul {
 }
 @media (max-width: 480px) {
   .location-toggle { grid-template-columns: 1fr; }
+  .distance-tiers { grid-template-columns: 1fr; }
 }
 .location-toggle-option {
   display: block;
@@ -2195,7 +2356,7 @@ ul {
   background: var(--bg-card);
   border: 2px solid #2a2a2a;
   border-radius: 10px;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 .location-toggle-card strong {
   font-family: 'Space Grotesk', sans-serif;
@@ -2210,17 +2371,18 @@ ul {
   font-style: normal;
   font-size: 0.78rem;
   color: var(--text-muted);
+  line-height: 1.45;
 }
 .location-toggle-option:hover .location-toggle-card {
   border-color: #444;
 }
 .location-toggle-option input:checked + .location-toggle-card {
-  border-color: var(--gold, #d4a017);
+  border-color: var(--red);
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 1px var(--gold, #d4a017) inset;
+  box-shadow: 0 0 0 1px var(--red) inset, 0 6px 22px rgba(196, 30, 58, 0.14);
 }
 .location-toggle-option input:focus-visible + .location-toggle-card {
-  outline: 2px solid var(--gold, #d4a017);
+  outline: 2px solid var(--red);
   outline-offset: 2px;
 }
 
@@ -2467,4 +2629,104 @@ ul {
   .reviews-hero {
     padding: 130px 0 40px;
   }
+}
+
+/* === Footer legal links === */
+.footer-legal {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.footer-legal li { display: inline-flex; }
+.footer-legal a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-legal a:hover { color: var(--red); }
+
+/* === Legal page (privacy.html, terms.html) === */
+.legal-page {
+  padding: 160px 0 100px;
+  background: var(--bg-primary);
+}
+.legal-page .container { max-width: 820px; }
+.legal-page h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(28px, 4vw, 40px);
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.legal-page .legal-eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--red);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.legal-page .legal-meta {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 36px;
+}
+.legal-page h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  margin: 36px 0 12px;
+  color: var(--text-primary);
+  border-left: 3px solid var(--red);
+  padding-left: 12px;
+}
+.legal-page p,
+.legal-page li {
+  color: var(--text-secondary);
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+.legal-page p { margin-bottom: 14px; }
+.legal-page ul {
+  list-style: disc;
+  padding-left: 24px;
+  margin: 0 0 16px;
+}
+.legal-page ul li { margin-bottom: 6px; }
+.legal-page a {
+  color: var(--red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal-page a:hover { color: var(--accent-hover); }
+.legal-page strong { color: var(--text-primary); }
+.legal-page .legal-cta {
+  margin-top: 36px;
+  padding: 20px 22px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid var(--red);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+@media (max-width: 640px) {
+  .legal-page { padding: 130px 0 70px; }
+}
+
+/* Honeypot fields — hidden from users, catches naive bots */
+.hp-trap {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }

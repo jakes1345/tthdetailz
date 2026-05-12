@@ -6,6 +6,18 @@
   <title>Reviews · TTH Detailz | Car Detailing — NW Suburbs</title>
   <meta name="description" content="See what our customers say about TTH Detailz. Leave a review for your detail — interior, exterior, full detail in the Northwest Suburbs of Chicago.">
   <meta name="theme-color" content="#0a0a0a">
+  <link rel="canonical" href="https://tthdetailz.autos/reviews.html">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tthdetailz.autos/reviews.html">
+  <meta property="og:site_name" content="TTH Detailz">
+  <meta property="og:title" content="Reviews · TTH Detailz">
+  <meta property="og:description" content="Real reviews from real customers in the Northwest Suburbs. See the work and leave your own.">
+  <meta property="og:image" content="https://tthdetailz.autos/media/images/photo1.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Reviews · TTH Detailz">
+  <meta name="twitter:description" content="Real reviews from real customers in the Northwest Suburbs. See the work and leave your own.">
+  <meta name="twitter:image" content="https://tthdetailz.autos/media/images/photo1.webp">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='28' fill='%23d4a017'%3ETTH%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,6 +123,14 @@
           <label for="reviewText">Your Review *</label>
           <textarea id="reviewText" name="review_text" rows="4" required placeholder="Tell us about your experience..."></textarea>
         </div>
+        <div class="hp-trap" aria-hidden="true">
+          <label for="review_hp_site">Leave blank</label>
+          <input type="text" id="review_hp_site" name="hp_website" tabindex="-1" autocomplete="off" value="">
+          <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
+          <input type="text" name="url" tabindex="-1" autocomplete="off" value="">
+          <input type="text" name="company_website" tabindex="-1" autocomplete="off" value="">
+          <input type="text" name="_hp" tabindex="-1" autocomplete="off" value="">
+        </div>
         <button type="submit" class="btn btn-primary btn-full">Submit Review</button>
         <div id="reviewSuccess" class="review-success" hidden>
           <p>✓ Thanks for your review! It's now live on the site.</p>
@@ -167,10 +187,16 @@
       </div>
       <div class="footer-bottom">
         <p>&copy; <span id="footerYear">2026</span> TTH Detailz. All rights reserved.</p>
+        <ul class="footer-legal">
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="tel:+16304541159">630-454-1159</a></li>
+        </ul>
       </div>
     </div>
   </footer>
 
+  <script src="track.js"></script>
   <script src="reviews.js"></script>
 </body>
 </html>

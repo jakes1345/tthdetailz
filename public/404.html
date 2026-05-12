@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 · TTH Detailz</title>
+  <meta name="description" content="Page not found. Head back to the home page or call TTH Detailz at 630-454-1159.">
   <meta name="theme-color" content="#0a0a0a">
+  <meta name="robots" content="noindex,follow">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='28' fill='%23d4a017'%3ETTH%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,5 +26,11 @@
     <a href="/" class="btn btn-primary">Back Home</a>
     <a href="tel:+16304541159" class="btn btn-outline">Call Us</a>
   </div>
+  <script src="track.js"></script>
+  <script>
+    if (typeof window.tthTrack === 'function') {
+      window.tthTrack('page_not_found', { path: window.location.pathname.slice(0, 120) });
+    }
+  </script>
 </body>
 </html>

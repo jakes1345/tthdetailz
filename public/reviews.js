@@ -1,6 +1,8 @@
 const REVIEWS_API = '/api/reviews';
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof window.tthTrackPageView === 'function') window.tthTrackPageView();
+
   const yearEl = document.getElementById('footerYear');
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
@@ -146,16 +148,24 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Submitting...';
       }
 
+      const honeypot = {};
+      ['hp_website', 'website', 'url', 'company_website', '_hp'].forEach((k) => {
+        honeypot[k] = (fd.get(k) || '').toString();
+      });
+
       try {
         const res = await fetch(REVIEWS_API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, rating, vehicle, review_text })
+          body: JSON.stringify({ name, rating, vehicle, review_text, ...honeypot })
         });
         if (!res.ok) throw new Error('submit failed');
         const data = await res.json();
 
         if (reviewSuccess) reviewSuccess.hidden = false;
+        if (typeof window.tthTrack === 'function') {
+          window.tthTrack('review_submit_ok', { rating });
+        }
         reviewForm.reset();
         // reset stars to 5
         if (starPicker) {

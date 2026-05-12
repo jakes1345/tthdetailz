@@ -1,9 +1,11 @@
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.CHAT_PORT || 3001;
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const TEXTBELT_KEY = process.env.TEXTBELT_KEY || 'textbelt';
 
 const Database = require('better-sqlite3');
 const path = require('path');
@@ -25,17 +27,112 @@ db.exec(`
   )
 `);
 
-app.use(express.json());
+db.exec(`
+  CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event TEXT NOT NULL,
+    metadata TEXT,
+    ip TEXT,
+    ua TEXT,
+    referer TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+db.exec('CREATE INDEX IF NOT EXISTS idx_events_event_created ON events(event, created_at)');
+
+app.use(express.json({ limit: '16kb' }));
 
 const apiLimiter = RateLimit({
   windowMs: 60 * 1000,
-  max: 20,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Slow down.' }
 });
 
 app.use('/api/', apiLimiter);
+
+const chatLimiter = RateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many chat requests. Please wait a minute.' }
+});
+
+const reviewsLimiter = RateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many review submissions. Please try later.' }
+});
+
+const thanksLimiter = RateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many thank-you texts from this IP. Try later.' }
+});
+
+const trackLimiter = RateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many tracking requests.' }
+});
+
+function cleanText(value, maxLen) {
+  return String(value || '').trim().slice(0, maxLen);
+}
+
+function normalizePhone(value) {
+  return String(value || '').replace(/[^0-9]/g, '');
+}
+
+const HONEYPOT_FIELDS = ['hp_website', 'website', 'url', 'company_website', '_hp'];
+
+function isHoneypotFilled(body) {
+  if (!body || typeof body !== 'object') return false;
+  for (const key of HONEYPOT_FIELDS) {
+    const value = body[key];
+    if (typeof value === 'string' && value.trim().length > 0) return true;
+    if (typeof value === 'number' && value !== 0) return true;
+  }
+  return false;
+}
+
+const EVENT_NAME_RE = /^[a-zA-Z][a-zA-Z0-9_.:-]{0,63}$/;
+const META_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/;
+const META_MAX_KEYS = 20;
+const META_MAX_STR = 200;
+const META_MAX_JSON = 2000;
+
+function sanitizeMetadata(meta) {
+  if (meta == null) return null;
+  if (typeof meta !== 'object' || Array.isArray(meta)) return null;
+  const out = {};
+  let count = 0;
+  for (const key of Object.keys(meta)) {
+    if (count >= META_MAX_KEYS) break;
+    if (!META_KEY_RE.test(key)) continue;
+    const value = meta[key];
+    if (value == null) continue;
+    if (typeof value === 'string') {
+      out[key] = value.slice(0, META_MAX_STR);
+    } else if (typeof value === 'number' && Number.isFinite(value)) {
+      out[key] = value;
+    } else if (typeof value === 'boolean') {
+      out[key] = value;
+    } else {
+      continue;
+    }
+    count++;
+  }
+  return out;
+}
 
 const FAQ = [
   { match: /\b(full detail|both interior)\b.*\b(price|cost|how much)\b|\b(200|225)\b/, resp: 'Full Detail (drop-off): Sedan $200, SUV/Truck $225. Add-ons extra. Text 630-454-1159 to book!' },
@@ -109,8 +206,12 @@ function findMatch(text) {
   return null;
 }
 
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', chatLimiter, async (req, res) => {
   try {
+    if (isHoneypotFilled(req.body)) {
+      console.warn('Chat honeypot triggered from', req.ip);
+      return res.status(400).json({ error: 'Invalid request.' });
+    }
     const { message, history } = req.body || {};
     if (!message || !message.trim()) {
       return res.status(400).json({ error: 'Message is required' });
@@ -156,24 +257,121 @@ app.get('/api/reviews', (req, res) => {
   }
 });
 
-app.post('/api/reviews', (req, res) => {
+app.post('/api/reviews', reviewsLimiter, (req, res) => {
   try {
+    if (isHoneypotFilled(req.body)) {
+      console.warn('Reviews honeypot triggered from', req.ip);
+      return res.status(400).json({ error: 'Invalid submission.' });
+    }
     const { name, rating, vehicle, review_text } = req.body || {};
-    if (!name || !rating || !review_text) {
+    const cleanName = cleanText(name, 80);
+    const cleanVehicle = cleanText(vehicle, 120);
+    const cleanReview = cleanText(review_text, 1200);
+    const ratingNum = Number.parseInt(rating, 10);
+
+    if (!cleanName || !cleanReview || Number.isNaN(ratingNum)) {
       return res.status(400).json({ error: 'Name, rating, and review text are required.' });
     }
+
+    if (ratingNum < 1 || ratingNum > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5.' });
+    }
+
     const stmt = db.prepare('INSERT INTO reviews (name, rating, vehicle, review_text) VALUES (?, ?, ?, ?)');
     const result = stmt.run(
-      name.trim(),
-      Math.min(5, Math.max(1, parseInt(rating, 10) || 5)),
-      (vehicle || '').trim(),
-      review_text.trim()
+      cleanName,
+      ratingNum,
+      cleanVehicle,
+      cleanReview
     );
+
+    const TEXTBELT_URL = 'https://textbelt.com/text';
+    const OWNER_PHONE = '16304541159';
+    const snippet = cleanReview.substring(0, 120);
+    fetch(TEXTBELT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: OWNER_PHONE,
+        message: `⭐️ New ${ratingNum}-star review from ${cleanName || 'Someone'}! "${snippet}"`,
+        key: TEXTBELT_KEY
+      })
+    }).then(r => r.json()).then(d => {
+      console.log('Review SMS:', d.quotaRemaining !== undefined ? `sent (${d.quotaRemaining} left today)` : 'failed - ' + (d.error || 'unknown'));
+    }).catch(e => console.error('Review SMS error:', e.message));
+
     res.json({ id: result.lastInsertRowid, status: 'approved' });
   } catch (err) {
     console.error('Review submit error:', err.message);
     res.status(500).json({ error: 'Failed to save review.' });
   }
+});
+
+app.post('/api/thanks', thanksLimiter, async (req, res) => {
+  try {
+    if (isHoneypotFilled(req.body)) {
+      console.warn('Thanks honeypot triggered from', req.ip);
+      return res.status(400).json({ error: 'Invalid submission.' });
+    }
+    const { phone, name } = req.body || {};
+    const cleanPhone = normalizePhone(phone);
+    const cleanName = cleanText(name, 80);
+    if (!cleanPhone) {
+      return res.status(400).json({ error: 'Phone number is required.' });
+    }
+    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+      return res.status(400).json({ error: 'Phone number format is invalid.' });
+    }
+    const TEXTBELT_URL = 'https://textbelt.com/text';
+    const msg = `Hey${cleanName ? ' ' + cleanName : ''}, thanks for choosing TTH Detailz! Leave a review: https://tthdetailz.autos/reviews.html`;
+    const textRes = await fetch(TEXTBELT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: cleanPhone, message: msg, key: TEXTBELT_KEY })
+    });
+    const data = await textRes.json();
+    console.log('Thanks SMS:', data.quotaRemaining !== undefined ? `sent (${data.quotaRemaining} left)` : 'failed');
+    res.json({ success: data.success, textbelt: { status: data.success ? 'sent' : 'failed', quotaRemaining: data.quotaRemaining } });
+  } catch (err) {
+    console.error('Thanks SMS error:', err.message);
+    res.status(500).json({ error: 'Failed to send thank-you text.' });
+  }
+});
+
+app.post('/api/track', trackLimiter, (req, res) => {
+  try {
+    if (isHoneypotFilled(req.body)) {
+      console.warn('Track honeypot triggered from', req.ip);
+      return res.status(400).json({ error: 'Invalid submission.' });
+    }
+    const { event } = req.body || {};
+    const cleanEvent = cleanText(event, 64);
+    if (!cleanEvent || !EVENT_NAME_RE.test(cleanEvent)) {
+      return res.status(400).json({ error: 'Invalid event name.' });
+    }
+    const meta = sanitizeMetadata(req.body && req.body.metadata);
+    let metaJson = null;
+    if (meta && Object.keys(meta).length > 0) {
+      const serialized = JSON.stringify(meta);
+      metaJson = serialized.length > META_MAX_JSON ? null : serialized;
+    }
+    const ip = (req.ip || '').toString().slice(0, 64);
+    const ua = (req.get('user-agent') || '').toString().slice(0, 200);
+    const referer = (req.get('referer') || '').toString().slice(0, 300);
+    db.prepare('INSERT INTO events (event, metadata, ip, ua, referer) VALUES (?, ?, ?, ?, ?)')
+      .run(cleanEvent, metaJson, ip, ua, referer);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Track error:', err.message);
+    res.status(500).json({ error: 'Failed to track event.' });
+  }
+});
+
+app.use((err, _req, res, next) => {
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON body.' });
+  }
+  return next(err);
 });
 
 app.listen(PORT, () => console.log('Chat server on port ' + PORT));

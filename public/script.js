@@ -47,6 +47,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearEl = document.getElementById('footerYear');
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+  if (typeof window.tthTrackPageView === 'function') window.tthTrackPageView();
+
+  function sectionHint(el) {
+    if (!el || !el.closest) return 'site';
+    const sec = el.closest('section[id]');
+    if (sec) return sec.id;
+    if (el.closest('.promo-banner')) return 'promo';
+    if (el.closest('.navbar')) return 'nav';
+    if (el.closest('.footer')) return 'footer';
+    return 'site';
+  }
+
+  document.addEventListener('click', (e) => {
+    const track = window.tthTrack;
+    if (typeof track !== 'function') return;
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    const hint = sectionHint(a);
+    if (href.startsWith('tel:')) track('cta_tel', { section: hint });
+    else if (href.startsWith('sms:')) track('cta_sms', { section: hint });
+    else if (/instagram\.com/i.test(href)) track('cta_instagram', { section: hint });
+    else if (/snapchat\.com/i.test(href)) track('cta_snapchat', { section: hint });
+  }, true);
+
   if (menuToggle && navLinks) {
     menuToggle.addEventListener('click', () => {
       menuToggle.classList.toggle('active');
@@ -239,6 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
     bookPackageBtn.addEventListener('click', () => {
       const vehicle = getVehicle();
       const service = document.querySelector('.service-option input:checked')?.value;
+      if (typeof window.tthTrack === 'function') {
+        window.tthTrack('quote_book_this_package', { vehicle: vehicle || '', service: service || '' });
+      }
       const sel = document.getElementById('b-service');
       if (sel && service && service !== 'ceramic') {
         const v = vehicle === 'sedan' ? 'sedan' : 'suv';
@@ -289,8 +317,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const bookingForm = document.getElementById('bookingForm');
   const bookingSuccess = document.getElementById('bookingSuccess');
   const downloadIcsAgainBtn = document.getElementById('downloadIcsAgain');
+  const bookingSuccessIntro = document.getElementById('bookingSuccessIntro');
+  const bookingFallback = document.getElementById('bookingFallback');
+  const bookingMessageEl = document.getElementById('bookingMessage');
+  const copyBookingBtn = document.getElementById('copyBookingDetails');
+  const reopenSmsLink = document.getElementById('reopenSmsLink');
   let lastIcsUrl = null;
   let lastIcsName = 'tth-detailz-booking.ics';
+  let lastSmsBody = '';
+  let lastSmsHref = '';
+
+  function isLikelyMobileDevice() {
+    const ua = navigator.userAgent || '';
+    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
+      return navigator.userAgentData.mobile;
+    }
+    return /Android|iPhone|iPad|iPod|Mobile|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  }
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -446,13 +489,76 @@ document.addEventListener('DOMContentLoaded', () => {
       ].filter(v => v !== null).join('\n');
 
       const smsHref = `sms:+16304541159?&body=${encodeURIComponent(smsBody)}`;
-      window.location.href = smsHref;
+      lastSmsBody = smsBody;
+      lastSmsHref = smsHref;
+
+      const mobile = isLikelyMobileDevice();
+
+      if (bookingMessageEl) bookingMessageEl.textContent = smsBody;
+      if (reopenSmsLink) reopenSmsLink.href = smsHref;
+      if (bookingFallback) bookingFallback.hidden = false;
+      if (bookingSuccessIntro) {
+        bookingSuccessIntro.textContent = mobile
+          ? "Your text should be open — hit send so I get the request. I'll confirm by text. The calendar invite was downloaded so you can add it to Google, Apple, or Outlook."
+          : "Heads up: text links don't always open on desktop. Copy the details below and send them to 630-454-1159 from your phone, or call instead. The calendar invite was downloaded so you can add it to Google, Apple, or Outlook.";
+      }
+      if (copyBookingBtn) copyBookingBtn.textContent = 'Copy Details';
 
       bookingForm.hidden = true;
       if (bookingSuccess) {
         bookingSuccess.hidden = false;
         bookingSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+
+      if (typeof window.tthTrack === 'function') {
+        window.tthTrack('booking_flow_completed', {
+          mobile: isMobile,
+          service: (service || '').slice(0, 48)
+        });
+      }
+
+      if (mobile) {
+        window.location.href = smsHref;
+      }
+    });
+  }
+
+  if (copyBookingBtn) {
+    copyBookingBtn.addEventListener('click', async () => {
+      const text = lastSmsBody || (bookingMessageEl ? bookingMessageEl.textContent : '');
+      if (!text) return;
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        }
+      } catch (_) { /* fall through to fallback below */ }
+      if (!copied) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          copied = document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (_) { copied = false; }
+      }
+      copyBookingBtn.textContent = copied ? 'Copied ✓' : 'Copy failed — select & copy manually';
+      copyBookingBtn.classList.toggle('is-copied', copied);
+      setTimeout(() => {
+        copyBookingBtn.textContent = 'Copy Details';
+        copyBookingBtn.classList.remove('is-copied');
+      }, 2400);
+    });
+  }
+
+  if (reopenSmsLink) {
+    reopenSmsLink.addEventListener('click', (e) => {
+      if (!lastSmsHref) e.preventDefault();
     });
   }
 

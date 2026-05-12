@@ -18,7 +18,8 @@ npm start
 
 ## Deploy
 
-Hosted on **Cloudflare Pages**. Push to `main` → auto-deploys.
+**Production:** VPS + nginx serves files from `/var/www/tthdetailz` (same contents as `public/`). Same-origin **`/api/*`** routes proxy to Node **`server/chat.js`** (reviews, chat, lightweight analytics). Restart the Node process after backend changes.
 
-- Build output directory: `public`
-- No build command needed (static site)
+**Local static preview:** `npm start` → `server.js` serves `public/` only (no `/api` unless you run the chat server separately).
+
+Optional: mirror **static** assets on Cloudflare Pages (`public` as output, no build step). The chat/review/API features still require the Node backend reachable at **`/api`** on your live domain (or adjust URLs).

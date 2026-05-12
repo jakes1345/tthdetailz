@@ -44,6 +44,14 @@
         <a href="sms:+16304541159" class="tth-chat-action">💬 Text</a>
         <a href="https://instagram.com/tthdetailz" target="_blank" class="tth-chat-action">📸 IG DM</a>
       </div>
+      <div class="hp-trap" aria-hidden="true">
+        <label for="tth-chat-hp">Leave blank</label>
+        <input type="text" id="tth-chat-hp" name="hp_website" tabindex="-1" autocomplete="off" value="">
+        <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
+        <input type="text" name="url" tabindex="-1" autocomplete="off" value="">
+        <input type="text" name="company_website" tabindex="-1" autocomplete="off" value="">
+        <input type="text" name="_hp" tabindex="-1" autocomplete="off" value="">
+      </div>
     </div>
   `;
   document.body.appendChild(container);
@@ -61,11 +69,27 @@
   box.style.display = 'none';
   openBtn.style.display = 'flex';
 
+  function honeypotPayload() {
+    const keys = ['hp_website', 'website', 'url', 'company_website', '_hp'];
+    const o = {};
+    keys.forEach((k) => {
+      const el = container.querySelector('[name="' + k + '"]');
+      o[k] = el && el.value ? el.value : '';
+    });
+    return o;
+  }
+
   openBtn.addEventListener('click', () => {
     box.style.display = 'flex';
     openBtn.style.display = 'none';
     input.focus();
     setTimeout(() => { msgsEl.scrollTop = msgsEl.scrollHeight; }, 100);
+    try {
+      if (!sessionStorage.getItem('tth_chat_open')) {
+        sessionStorage.setItem('tth_chat_open', '1');
+        if (typeof window.tthTrack === 'function') window.tthTrack('chat_open', {});
+      }
+    } catch (_) {}
   });
 
   closeBtn.addEventListener('click', () => {
@@ -97,12 +121,16 @@
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, history })
+        body: JSON.stringify({ message: msg, history, ...honeypotPayload() })
       });
       const data = await res.json();
       if (data.reply) {
         addMsg(data.reply, 'bot');
         history.push({ role: 'model', parts: [{ text: data.reply }] });
+        if (!window.__tthChatReplyTracked) {
+          window.__tthChatReplyTracked = true;
+          if (typeof window.tthTrack === 'function') window.tthTrack('chat_reply_ok', {});
+        }
       } else {
         addMsg('Hmm, I couldn\'t process that. Text 630-454-1159 directly for help 👍', 'bot');
       }

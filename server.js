@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 5001;
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -19,8 +20,16 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = req.url === '/' ? '/index.html' : req.url;
-  filePath = path.join(__dirname, 'public', filePath);
+  const rawPath = req.url.split('?')[0];
+  const requestPath = rawPath === '/' ? '/index.html' : rawPath;
+  const normalizedPath = path.normalize(requestPath).replace(/^(\.\.[/\\])+/, '');
+  const filePath = path.join(PUBLIC_DIR, normalizedPath);
+
+  if (!filePath.startsWith(PUBLIC_DIR)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('403 - Forbidden');
+    return;
+  }
 
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
