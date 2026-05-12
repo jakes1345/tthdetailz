@@ -156,6 +156,44 @@ document.addEventListener('DOMContentLoaded', () => {
   addonOptions.forEach(opt => opt.addEventListener('change', calculateTotal));
   calculateTotal();
 
+  // Service location (drop-off vs mobile) — calculator + booking form sync
+  const calcLocationOptions = document.querySelectorAll('input[name="location"]');
+  const bookLocationOptions = document.querySelectorAll('input[name="b-location"]');
+  const mobileUpchargeNote = document.getElementById('mobileUpchargeNote');
+  const addressInput = document.getElementById('b-address');
+  const addressLabel = document.getElementById('addressLabel');
+  const addressHint = document.getElementById('addressHint');
+  const addressReq = document.getElementById('addressReq');
+
+  function getCalcLocation() {
+    const v = document.querySelector('input[name="location"]:checked');
+    return v ? v.value : 'dropoff';
+  }
+  function getBookLocation() {
+    const v = document.querySelector('input[name="b-location"]:checked');
+    return v ? v.value : 'dropoff';
+  }
+
+  function refreshCalcMobileNote() {
+    if (!mobileUpchargeNote) return;
+    mobileUpchargeNote.hidden = getCalcLocation() !== 'mobile';
+  }
+
+  function refreshBookAddressField() {
+    if (!addressInput) return;
+    const mobile = getBookLocation() === 'mobile';
+    if (addressLabel) addressLabel.textContent = mobile ? 'Mobile Address' : 'Your City / Town';
+    if (addressHint) addressHint.textContent = mobile ? '(street, city — so we can quote the upcharge)' : '(so we can plan drop-off)';
+    if (addressReq) addressReq.hidden = !mobile;
+    addressInput.placeholder = mobile ? '123 Main St, Schaumburg, IL' : 'e.g. Schaumburg, IL';
+    addressInput.required = mobile;
+  }
+
+  calcLocationOptions.forEach(opt => opt.addEventListener('change', refreshCalcMobileNote));
+  bookLocationOptions.forEach(opt => opt.addEventListener('change', refreshBookAddressField));
+  refreshCalcMobileNote();
+  refreshBookAddressField();
+
   if (bookPackageBtn) {
     bookPackageBtn.addEventListener('click', () => {
       const vehicle = getVehicle();
@@ -165,6 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const v = vehicle === 'sedan' ? 'sedan' : 'suv';
         const target = `${service}-${v}`;
         if ([...sel.options].some(o => o.value === target)) sel.value = target;
+      }
+      // Sync location: calculator -> booking form
+      const calcLoc = getCalcLocation();
+      const bookLocInput = document.querySelector(`input[name="b-location"][value="${calcLoc}"]`);
+      if (bookLocInput) {
+        bookLocInput.checked = true;
+        refreshBookAddressField();
       }
       const addonMap = {
         engine: 'Engine Bay (+$75)',
@@ -282,9 +327,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const address = (fd.get('address') || '').toString().trim();
       const notes = (fd.get('notes') || '').toString().trim();
       const addons = fd.getAll('b-addon').map(a => a.toString());
+      const locationMode = (fd.get('b-location') || 'dropoff').toString();
+      const isMobile = locationMode === 'mobile';
 
       if (!name || !phone || !vehicle || !service || !date || !time) {
         alert('Please fill in name, phone, vehicle, service, date, and time.');
+        return;
+      }
+
+      if (isMobile && !address) {
+        alert('For mobile service, please enter your address so we can quote the upcharge.');
         return;
       }
 
@@ -296,22 +348,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const serviceLabel = SERVICE_LABEL[service] || service;
       const addonLine = addons.length ? `Add-ons: ${addons.join(', ')}` : 'Add-ons: none';
-      const summary = `TTH Detailz — ${serviceLabel.split(' — ')[0]}`;
+      const locationLabel = isMobile ? 'Mobile (upcharge applies)' : 'Drop-Off (NW Suburbs)';
+      const addressLineLabel = isMobile ? 'Mobile address' : 'Customer city';
+      const summary = `TTH Detailz — ${serviceLabel.split(' — ')[0]}${isMobile ? ' (Mobile)' : ''}`;
       const description = [
         `Service: ${serviceLabel}`,
+        `Location: ${locationLabel}`,
         addonLine,
         `Vehicle: ${vehicle}`,
         `Customer: ${name} (${phone}${email ? ', ' + email : ''})`,
-        address ? `City: ${address}` : null,
+        address ? `${addressLineLabel}: ${address}` : null,
         notes ? `Notes: ${notes}` : null,
         '',
-        'Status: Tentative — pending confirmation by text from TTH Detailz (630-454-1159).'
+        isMobile
+          ? 'Status: Tentative — TTH Detailz will text the mobile upcharge quote and confirm (630-454-1159).'
+          : 'Status: Tentative — pending confirmation by text from TTH Detailz (630-454-1159).'
       ].filter(Boolean).join('\n');
 
       const ics = buildICS({
         summary,
         description,
-        location: 'TTH Detailz — Northwest Suburbs (drop-off address sent on confirmation)',
+        location: isMobile
+          ? (address ? `Mobile service — ${address}` : 'Mobile service — Northwest Suburbs')
+          : 'TTH Detailz — Northwest Suburbs (drop-off address sent on confirmation)',
         start,
         end
       });
@@ -333,10 +392,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `Vehicle: ${vehicle}`,
         `Service: ${serviceLabel}`,
         addonLine,
+        `Location: ${locationLabel}`,
         `When: ${dateNice} @ ${timeNice}`,
-        address ? `Customer city: ${address}` : null,
-        notes ? `Notes: ${notes}` : null
-      ].filter(Boolean).join('\n');
+        address ? `${addressLineLabel}: ${address}` : null,
+        notes ? `Notes: ${notes}` : null,
+        isMobile ? '' : null,
+        isMobile ? '(Mobile — please send upcharge quote)' : null
+      ].filter(v => v !== null).join('\n');
 
       const smsHref = `sms:+16304541159?&body=${encodeURIComponent(smsBody)}`;
       window.location.href = smsHref;

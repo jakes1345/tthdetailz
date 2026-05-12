@@ -48,7 +48,7 @@
       <p class="hero-subtitle">Northwest Suburbs · Drop-Off Detailing</p>
       <h1 class="hero-title">TTH <span class="accent">Detailz</span></h1>
       <p class="hero-tagline">Interior, exterior &amp; full details. Pet hair, odor &amp; engine bay add-ons. Inside. Outside. <span class="accent">Immaculate.</span></p>
-      <p class="hero-subline">Drop your car off in the <strong>Northwest Suburbs</strong>. Same-day appointments when available. All budgets welcome.</p>
+      <p class="hero-subline">Drop your car off in the <strong>Northwest Suburbs</strong> — or ask about <strong>mobile service</strong> (upcharge applies). Same-day slots when available.</p>
       <div class="hero-ctas">
         <a href="#book" class="btn btn-primary">Book Online</a>
         <a href="#quote" class="btn btn-outline">See Pricing</a>
@@ -98,7 +98,33 @@
           </div>
         </div>
         <div class="calc-step">
-          <h3>2. Select Service</h3>
+          <h3>2. Service Location</h3>
+          <div class="location-grid">
+            <label class="location-option">
+              <input type="radio" name="location" value="dropoff" checked>
+              <div class="location-card">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h2v2H9zM13 9h2v2h-2zM9 13h2v2H9zM13 13h2v2h-2z"/>
+                </svg>
+                <span class="location-title">Drop-Off</span>
+                <span class="location-sub">NW Suburbs · Standard pricing</span>
+              </div>
+            </label>
+            <label class="location-option">
+              <input type="radio" name="location" value="mobile">
+              <div class="location-card">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="8" width="14" height="9" rx="1"/>
+                  <path d="M16 11h4l2 3v3h-6zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                </svg>
+                <span class="location-title">Mobile <span class="upcharge-tag">Upcharge</span></span>
+                <span class="location-sub">We come to you · Pricing on request</span>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="calc-step">
+          <h3>3. Select Service</h3>
           <div class="service-grid">
             <label class="service-option">
               <input type="radio" name="service" value="exterior" data-sedan="70" data-suv="75">
@@ -130,7 +156,7 @@
           </div>
         </div>
         <div class="calc-step">
-          <h3>3. Add-Ons (Optional)</h3>
+          <h3>4. Add-Ons (Optional)</h3>
           <div class="addons-grid">
             <label class="addon-option">
               <input type="checkbox" name="addon" value="engine" data-price="75">
@@ -166,6 +192,7 @@
         <div class="calc-total">
           <div class="total-label">Estimated Total</div>
           <div class="total-price" id="totalPrice">$200</div>
+          <p class="mobile-upcharge-note" id="mobileUpchargeNote" hidden>Mobile service adds an upcharge based on distance. Final price confirmed by text after booking.</p>
           <a href="#book" class="btn btn-primary btn-full" id="bookPackageBtn">Book This Package</a>
         </div>
       </div>
@@ -235,6 +262,17 @@
           <p>Deep pet hair removal and odor treatments — get the cabin back to fresh, no shedding left behind.</p>
           <span class="price">Pet hair +$50 · Odor +$125</span>
         </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="8" width="14" height="9" rx="1"/>
+              <path d="M16 11h4l2 3v3h-6zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+            </svg>
+          </div>
+          <h3>Mobile Service</h3>
+          <p>Can't drop off? We'll come to your home or office. Upcharge applies based on distance and job — text us for a quick quote.</p>
+          <span class="price">Upcharge · Quote on request</span>
+        </div>
       </div>
     </div>
   </section>
@@ -265,8 +303,8 @@
               <path d="M12 6v6l4 2"/>
             </svg>
           </div>
-          <h3>Drop Off Your Car</h3>
-          <p>Bring your car to us in the Northwest Suburbs at your scheduled time. We'll text you the exact drop-off address after you book.</p>
+          <h3>Drop Off (or We Come to You)</h3>
+          <p>Bring your car to us in the Northwest Suburbs — exact address sent by text after booking. Need mobile service? Available on request with an upcharge — just ask.</p>
         </div>
         <div class="process-step">
           <div class="step-number">03</div>
@@ -556,7 +594,16 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>We're based in the Northwest Suburbs of Chicago. Once you book, we'll text you the exact drop-off address with directions. Mobile service isn't offered right now, but it may be in the future — for now everything is drop-off so we can give your car the time it deserves.</p>
+            <p>We're based in the Northwest Suburbs of Chicago. Once you book, we'll text you the exact drop-off address with directions. Drop-off is our default and gets you our best pricing.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Do you do mobile detailing?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes — mobile is available on request with an upcharge. The fee depends on distance and the job, so text or call us with your address and what you need and we'll quote it. Drop-off is still preferred when possible since it lets us give your car the full attention it deserves.</p>
           </div>
         </div>
         <div class="faq-item">
@@ -656,7 +703,26 @@
             </select>
           </div>
           <div class="form-row form-row-full">
-            <label for="b-address">Your City / Town <span class="opt">(so we can plan drop-off)</span></label>
+            <label>Service Location<span class="req">*</span></label>
+            <div class="location-toggle">
+              <label class="location-toggle-option">
+                <input type="radio" name="b-location" value="dropoff" checked>
+                <span class="location-toggle-card">
+                  <strong>Drop-Off</strong>
+                  <em>NW Suburbs · Standard pricing</em>
+                </span>
+              </label>
+              <label class="location-toggle-option">
+                <input type="radio" name="b-location" value="mobile">
+                <span class="location-toggle-card">
+                  <strong>Mobile <span class="upcharge-tag">Upcharge</span></strong>
+                  <em>We come to you · Pricing on request</em>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="form-row form-row-full" id="addressRow">
+            <label for="b-address"><span id="addressLabel">Your City / Town</span> <span class="opt" id="addressHint">(so we can plan drop-off)</span><span class="req" id="addressReq" hidden>*</span></label>
             <input type="text" id="b-address" name="address" placeholder="e.g. Schaumburg, IL">
           </div>
           <div class="form-row form-row-full">
