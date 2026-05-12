@@ -25,3 +25,6 @@ scraped/
 
 # Image backups (keep the optimized versions, ignore originals)
 *.orig
+
+# VPS credentials (private — never commit)
+.vps/
