@@ -118,9 +118,43 @@
                   <path d="M16 11h4l2 3v3h-6zM6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
                 </svg>
                 <span class="location-title">Mobile <span class="upcharge-tag">Upcharge</span></span>
-                <span class="location-sub">We come to you · Pricing on request</span>
+                <span class="location-sub">We come to you · Distance-based pricing</span>
               </div>
             </label>
+          </div>
+          <div class="calc-distance" id="calcDistance" hidden>
+            <h4>Mobile Upcharge by Distance</h4>
+            <div class="distance-tiers">
+              <label class="distance-option">
+                <input type="radio" name="distance" value="within5" data-price="20">
+                <div class="distance-card">
+                  <span class="distance-label">0–5 miles</span>
+                  <span class="distance-price">+$30</span>
+                </div>
+              </label>
+              <label class="distance-option">
+                <input type="radio" name="distance" value="5to15" data-price="45" checked>
+                <div class="distance-card">
+                  <span class="distance-label">5–15 miles</span>
+                  <span class="distance-price">+$45</span>
+                </div>
+              </label>
+              <label class="distance-option">
+                <input type="radio" name="distance" value="15to25" data-price="65">
+                <div class="distance-card">
+                  <span class="distance-label">15–25 miles</span>
+                  <span class="distance-price">+$65</span>
+                </div>
+              </label>
+              <label class="distance-option">
+                <input type="radio" name="distance" value="over25" data-price="0">
+                <div class="distance-card distance-custom">
+                  <span class="distance-label">25+ miles</span>
+                  <span class="distance-price">Call for quote</span>
+                </div>
+              </label>
+            </div>
+            <p class="distance-note">Final price confirmed by text — exact distance &amp; job type can affect the total.</p>
           </div>
         </div>
         <div class="calc-step">
@@ -192,7 +226,7 @@
         <div class="calc-total">
           <div class="total-label">Estimated Total</div>
           <div class="total-price" id="totalPrice">$200</div>
-          <p class="mobile-upcharge-note" id="mobileUpchargeNote" hidden>Mobile service adds an upcharge based on distance. Final price confirmed by text after booking.</p>
+          <p class="mobile-upcharge-note" id="mobileUpchargeNote" hidden>Mobile pricing: +$30 (0–5 mi) · +$45 (5–15 mi) · +$65 (15–25 mi) · 25+ call for quote. Final price confirmed by text.</p>
           <a href="#book" class="btn btn-primary btn-full" id="bookPackageBtn">Book This Package</a>
         </div>
       </div>
@@ -270,8 +304,8 @@
             </svg>
           </div>
           <h3>Mobile Service</h3>
-          <p>Can't drop off? We'll come to your home or office. Upcharge applies based on distance and job — text us for a quick quote.</p>
-          <span class="price">Upcharge · Quote on request</span>
+          <p>Can't drop off? We'll come to your home or office. Upcharge by distance: 0–5mi +$30 · 5–15mi +$45 · 15–25mi +$65 · 25+ call for quote.</p>
+          <span class="price">+$30 to +$65 · Call for 25+ mi</span>
         </div>
       </div>
     </div>
@@ -603,7 +637,7 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>Yes — mobile is available on request with an upcharge. The fee depends on distance and the job, so text or call us with your address and what you need and we'll quote it. Drop-off is still preferred when possible since it lets us give your car the full attention it deserves.</p>
+            <p>Yes — mobile is available with a distance upcharge. <strong>0–5 miles +$30 · 5–15 miles +$45 · 15–25 miles +$65 · 25+ miles call for quote.</strong> Drop-off is still preferred when possible since it lets us give your car the full attention it deserves, but we can work it out if you need us on-site.</p>
           </div>
         </div>
         <div class="faq-item">

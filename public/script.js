@@ -148,7 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (addon.checked) total += parseInt(addon.dataset.price, 10) || 0;
     });
 
-    if (totalPriceEl) totalPriceEl.textContent = `$${total}`;
+    if (getCalcLocation() === 'mobile') {
+      total += getCalcDistancePrice();
+    }
+
+    if (totalPriceEl) {
+      const isOver25 = getCalcLocation() === 'mobile' && getCalcDistance() === 'over25';
+      totalPriceEl.textContent = isOver25 ? 'Ask' : `$${total}`;
+    }
   }
 
   vehicleOptions.forEach(opt => opt.addEventListener('change', calculateTotal));
@@ -158,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Service location (drop-off vs mobile) — calculator + booking form sync
   const calcLocationOptions = document.querySelectorAll('input[name="location"]');
+  const calcDistance = document.getElementById('calcDistance');
+  const distanceOptions = document.querySelectorAll('input[name="distance"]');
   const bookLocationOptions = document.querySelectorAll('input[name="b-location"]');
   const mobileUpchargeNote = document.getElementById('mobileUpchargeNote');
   const addressInput = document.getElementById('b-address');
@@ -173,10 +182,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const v = document.querySelector('input[name="b-location"]:checked');
     return v ? v.value : 'dropoff';
   }
+  function getCalcDistance() {
+    const v = document.querySelector('input[name="distance"]:checked');
+    return v ? v.value : 'within5';
+  }
+  function getCalcDistancePrice() {
+    const v = document.querySelector('input[name="distance"]:checked');
+    if (!v || v.value === 'over25') return 0;
+    return parseInt(v.dataset.price, 10) || 0;
+  }
+  function getCalcDistanceLabel() {
+    const labels = { within5: '0–5 mi', '5to15': '5–15 mi', '15to25': '15–25 mi', over25: '25+ mi' };
+    const v = getCalcDistance();
+    return labels[v] || '';
+  }
 
   function refreshCalcMobileNote() {
     if (!mobileUpchargeNote) return;
-    mobileUpchargeNote.hidden = getCalcLocation() !== 'mobile';
+    const mobile = getCalcLocation() === 'mobile';
+    if (calcDistance) calcDistance.hidden = !mobile;
+    if (mobile) {
+      const d = getCalcDistance();
+      const p = getCalcDistancePrice();
+      mobileUpchargeNote.hidden = false;
+      mobileUpchargeNote.textContent = d === 'over25'
+        ? '25+ miles — call or text for a custom quote.'
+        : `Mobile upcharge: +$${p} (${getCalcDistanceLabel()}). Final price confirmed by text.`;
+    } else {
+      mobileUpchargeNote.hidden = true;
+    }
   }
 
   function refreshBookAddressField() {
@@ -189,7 +223,14 @@ document.addEventListener('DOMContentLoaded', () => {
     addressInput.required = mobile;
   }
 
-  calcLocationOptions.forEach(opt => opt.addEventListener('change', refreshCalcMobileNote));
+  calcLocationOptions.forEach(opt => opt.addEventListener('change', () => {
+    refreshCalcMobileNote();
+    calculateTotal();
+  }));
+  distanceOptions.forEach(opt => opt.addEventListener('change', () => {
+    refreshCalcMobileNote();
+    calculateTotal();
+  }));
   bookLocationOptions.forEach(opt => opt.addEventListener('change', refreshBookAddressField));
   refreshCalcMobileNote();
   refreshBookAddressField();
@@ -350,6 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const addonLine = addons.length ? `Add-ons: ${addons.join(', ')}` : 'Add-ons: none';
       const locationLabel = isMobile ? 'Mobile (upcharge applies)' : 'Drop-Off (NW Suburbs)';
       const addressLineLabel = isMobile ? 'Mobile address' : 'Customer city';
+      const calcDistVal = isMobile ? getCalcDistance() : null;
+      const distLabels = { within5: '0–5mi (+$30)', '5to15': '5–15mi (+$45)', '15to25': '15–25mi (+$65)', over25: '25+mi (call for quote)' };
+      const distEstimate = calcDistVal ? distLabels[calcDistVal] : null;
       const summary = `TTH Detailz — ${serviceLabel.split(' — ')[0]}${isMobile ? ' (Mobile)' : ''}`;
       const description = [
         `Service: ${serviceLabel}`,
@@ -393,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `Service: ${serviceLabel}`,
         addonLine,
         `Location: ${locationLabel}`,
+        isMobile && distEstimate ? `Est. distance: ${distEstimate}` : null,
         `When: ${dateNice} @ ${timeNice}`,
         address ? `${addressLineLabel}: ${address}` : null,
         notes ? `Notes: ${notes}` : null,
