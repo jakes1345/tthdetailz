@@ -30,3 +30,9 @@ scraped/
 
 # Server runtime data (SQLite DB, logs — generated on VPS)
 server/data/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
